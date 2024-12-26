@@ -67,29 +67,7 @@ function makeBook(bookObject) {
   textContainer.setAttribute('data-bookid', `${bookObject.id}`);
   textContainer.setAttribute('data-testid', `bookItem`);
 
-  if (bookObject.isComplete) {
-
-    const undoButton = document.createElement('button');
-    undoButton.classList.add('undo-button');
-    undoButton.innerText = 'Batal arsip';
-    undoButton.setAttribute('data-testid', 'bookItemIsCompleteButton');
-
-    undoButton.addEventListener('click', function () {
-      undoBookFromCompleted(bookObject.id);
-    });
-
-    const trashButton = document.createElement('button');
-    trashButton.classList.add('trash-button');
-    trashButton.innerText = 'Hapus';
-    trashButton.setAttribute('data-testid', 'bookItemDeleteButton');
-
-    trashButton.addEventListener('click', function () {
-      removeBookFromCompleted(bookObject.id);
-    });
-
-    textContainer.append(undoButton, trashButton);
-
-  } else {
+  if (!bookObject.isComplete) {
     const finishButton = document.createElement('button');
     finishButton.classList.add('finish-button');
     finishButton.innerText = "Selesai Dibaca";
@@ -97,7 +75,7 @@ function makeBook(bookObject) {
 
     finishButton.addEventListener('click', function () {
       moveBookToCompleted(bookObject.id);
-    });
+    });    
 
     const trashButton = document.createElement('button');
     trashButton.classList.add('trash-button');
@@ -109,6 +87,27 @@ function makeBook(bookObject) {
     });
 
     textContainer.append(finishButton, trashButton);
+
+  } else {
+    const undoButton = document.createElement('button');
+    undoButton.classList.add('undo-button');
+    undoButton.innerText = 'Batal arsip';
+    undoButton.setAttribute('data-testid', 'bookItemIsCompleteButton');
+
+    undoButton.addEventListener('click', function () {
+      undoBookFromCompleted(bookObject.id);
+    });
+    
+    const trashButton = document.createElement('button');
+    trashButton.classList.add('trash-button');
+    trashButton.innerText = 'Hapus';
+    trashButton.setAttribute('data-testid', 'bookItemDeleteButton');
+
+    trashButton.addEventListener('click', function () {
+      removeBookFromCompleted(bookObject.id);
+    });
+
+    textContainer.append(undoButton, trashButton);
   }
 
 
@@ -121,7 +120,16 @@ function moveBookToCompleted(bookId) {
  
   if (bookTarget == null) return;
  
-  bookTarget.isCompleted = true;
+  bookTarget.isComplete = true;
+  document.dispatchEvent(new Event(RENDER_EVENT));
+}
+
+function undoBookFromCompleted(bookId) {
+  const bookTarget = findBook(bookId);
+ 
+  if (bookTarget == null) return;
+ 
+  bookTarget.isComplete = false;
   document.dispatchEvent(new Event(RENDER_EVENT));
 }
 
@@ -134,14 +142,7 @@ function removeBookFromCompleted(bookId) {
   document.dispatchEvent(new Event(RENDER_EVENT));
 }
 
-function undoBookFromCompleted(bookId) {
-  const bookTarget = findTodo(bookId);
- 
-  if (bookTarget == null) return;
- 
-  bookTarget.isCompleted = false;
-  document.dispatchEvent(new Event(RENDER_EVENT));
-}
+
 
 
 document.addEventListener(RENDER_EVENT, function () {
@@ -155,10 +156,11 @@ document.addEventListener(RENDER_EVENT, function () {
  
   for (const bookItem of books) {
     const bookElement = makeBook(bookItem);
-    if (!bookItem.isCompleted) 
+    if (!bookItem.isCompleted){ 
       uncompleteBOOKList.append(bookElement);
-    else
+    } else{
       completedBOOKList.append(bookElement);
+      }
   }
 });
 
